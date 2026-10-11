@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="module-header">
+    <h2>3. Thermodynamics</h2>
+</div>
+
+<div class="tabs">
+    <button class="tab-button active" data-tab="heat">Heat Transfer</button>
+    <button class="tab-button" data-tab="work">Work Done</button>
+    <button class="tab-button" data-tab="efficiency">Efficiency</button>
+</div>
+
+<!-- Heat Transfer -->
+<div id="heat" class="tab-content active">
+    <h3>Heat Transfer | Q = m × c × ΔT</h3>
+    <form onsubmit="calculate(event, 'heat')">
+        <label>Mass (kg):</label>
+        <input type="number" step="0.1" placeholder="2" id="heat_mass" required>
+        
+        <label>Specific Heat Capacity (J/kg·K):</label>
+        <input type="number" step="10" placeholder="4200" id="heat_specific" required>
+        
+        <label>Temperature Change (K):</label>
+        <input type="number" step="1" placeholder="20" id="heat_delta_temp" required>
+        
+        <button type="submit">Calculate</button>
+    </form>
+    <div id="heat_result" class="result"></div>
+</div>
+
+<!-- Work Done -->
+<div id="work" class="tab-content">
+    <h3>Work Done by Gas | W = P × ΔV</h3>
+    <form onsubmit="calculate(event, 'work')">
+        <label>Pressure (Pa):</label>
+        <input type="number" step="1000" placeholder="150000" id="work_pressure" required>
+        
+        <label>Volume Change (m³):</label>
+        <input type="number" step="0.001" placeholder="0.02" id="work_delta_vol" required>
+        
+        <button type="submit">Calculate</button>
+    </form>
+    <div id="work_result" class="result"></div>
+</div>
+
+<!-- Efficiency -->
+<div id="efficiency" class="tab-content">
+    <h3>Thermal Efficiency | η = W_net / Q_in</h3>
+    <form onsubmit="calculate(event, 'efficiency')">
+        <label>Net Work Output (J):</label>
+        <input type="number" step="1000" placeholder="60000" id="eff_net_work" required>
+        
+        <label>Heat Supplied (J):</label>
+        <input type="number" step="1000" placeholder="180000" id="eff_heat_in" required>
+        
+        <button type="submit">Calculate</button>
+    </form>
+    <div id="efficiency_result" class="result"></div>
+</div>
+
+<script>
+function calculate(event, action) {
+    event.preventDefault();
+    
+    let data = { action: action };
+    
+    if (action === 'heat') {
+        data.mass = document.getElementById('heat_mass').value;
+        data.specific_heat = document.getElementById('heat_specific').value;
+        data.delta_temp = document.getElementById('heat_delta_temp').value;
+    } else if (action === 'work') {
+        data.pressure = document.getElementById('work_pressure').value;
+        data.delta_volume = document.getElementById('work_delta_vol').value;
+    } else if (action === 'efficiency') {
+        data.net_work = document.getElementById('eff_net_work').value;
+        data.heat_in = document.getElementById('eff_heat_in').value;
+    }
+    
+    fetch('{{ url_for("thermodynamics") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        let resultDiv = document.getElementById(action + '_result');
+        if (result.error) {
+            resultDiv.innerHTML = `<p class="error">❌ Error: ${result.error}</p>`;
+            resultDiv.className = 'result error';
+        } else {
+            let output = '';
+            for (let key in result) {
+                output += `<p><strong>${key}:</strong> ${result[key]}</p>`;
+            }
+            resultDiv.innerHTML = output;
+            resultDiv.className = 'result success';
+        }
+    });
+}
+
+document.querySelectorAll('.tab-button').forEach(button => {
+    button.addEventListener('click', function() {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        
+        document.getElementById(this.dataset.tab).classList.add('active');
+        this.classList.add('active');
+    });
+});
+</script>
+{% endblock %}
