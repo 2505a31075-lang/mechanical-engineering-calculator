@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mechanical Engineering Calculator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="logo">⚙️ Mechanical Engineering Calculator</h1>
+            <ul class="nav-links">
+                <li><a href="{{ url_for('home') }}">Home</a></li>
+                <li><a href="{{ url_for('mechanics') }}">Mechanics</a></li>
+                <li><a href="{{ url_for('strength') }}">Strength</a></li>
+                <li><a href="{{ url_for('thermodynamics') }}">Thermodynamics</a></li>
+                <li><a href="{{ url_for('fluid') }}">Fluid Mechanics</a></li>
+                <li><a href="{{ url_for('thermal_eng') }}">Thermal Eng</a></li>
+                <li><a href="{{ url_for('machine_design') }}">Machine Design</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}
+        <div class="hero">
+            <h2>Welcome to the Mechanical Engineering Calculator</h2>
+            <p>Select a module from the navigation bar to get started.</p>
+            <div class="modules">
+                <a href="{{ url_for('mechanics') }}" class="module-card">
+                    <h3>1. Mechanics</h3>
+                    <p>Force, Work, Power, Kinetic Energy</p>
+                </a>
+                <a href="{{ url_for('strength') }}" class="module-card">
+                    <h3>2. Strength of Materials</h3>
+                    <p>Stress, Strain, Young's Modulus</p>
+                </a>
+                <a href="{{ url_for('thermodynamics') }}" class="module-card">
+                    <h3>3. Thermodynamics</h3>
+                    <p>Heat Transfer, Work, Efficiency</p>
+                </a>
+                <a href="{{ url_for('fluid') }}" class="module-card">
+                    <h3>4. Fluid Mechanics</h3>
+                    <p>Pressure, Reynolds, Discharge</p>
+                </a>
+                <a href="{{ url_for('thermal_eng') }}" class="module-card">
+                    <h3>5. Thermal Engineering</h3>
+                    <p>Heat Conduction, COP, Efficiency</p>
+                </a>
+                <a href="{{ url_for('machine_design') }}" class="module-card">
+                    <h3>6. Machine Design</h3>
+                    <p>Torque, Shaft Power, Diameter</p>
+                </a>
+            </div>
+        </div>
+        {% endblock %}
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 Mechanical Engineering Calculator. All rights reserved.</p>
+    </footer>
+</body>
+</html>
