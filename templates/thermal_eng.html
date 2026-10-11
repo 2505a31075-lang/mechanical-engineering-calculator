@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="module-header">
+    <h2>5. Thermal Engineering</h2>
+</div>
+
+<div class="tabs">
+    <button class="tab-button active" data-tab="conduction">Heat Conduction</button>
+    <button class="tab-button" data-tab="cop">COP</button>
+    <button class="tab-button" data-tab="engine">Engine Efficiency</button>
+</div>
+
+<!-- Heat Conduction -->
+<div id="conduction" class="tab-content active">
+    <h3>Heat Conduction (Fourier's Law) | Q = (k × A × ΔT) / L</h3>
+    <form onsubmit="calculate(event, 'conduction')">
+        <label>Thermal Conductivity (W/m·K):</label>
+        <input type="number" step="0.05" placeholder="0.8" id="cond_conductivity" required>
+        
+        <label>Cross-sectional Area (m²):</label>
+        <input type="number" step="0.1" placeholder="2" id="cond_area" required>
+        
+        <label>Temperature Difference (K):</label>
+        <input type="number" step="1" placeholder="40" id="cond_temp_diff" required>
+        
+        <label>Wall Thickness (m):</label>
+        <input type="number" step="0.01" placeholder="0.2" id="cond_thickness" required>
+        
+        <button type="submit">Calculate</button>
+    </form>
+    <div id="conduction_result" class="result"></div>
+</div>
+
+<!-- COP -->
+<div id="cop" class="tab-content">
+    <h3>Coefficient of Performance (COP)</h3>
+    <form onsubmit="calculate(event, 'cop')">
+        <label>Type:</label>
+        <select id="cop_type" required>
+            <option value="Refrigerator">Refrigerator (COP = Qc / W)</option>
+            <option value="Heat Pump">Heat Pump (COP = Qh / W)</option>
+        </select>
+        
+        <label>Heat Moved (J or W):</label>
+        <input type="number" step="100" placeholder="5000" id="cop_heat" required>
+        
+        <label>Compressor Work Input (J or W):</label>
+        <input type="number" step="50" placeholder="1000" id="cop_work" required>
+        
+        <button type="submit">Calculate</button>
+    </form>
+    <div id="cop_result" class="result"></div>
+</div>
+
+<!-- Engine Efficiency -->
+<div id="engine" class="tab-content">
+    <h3>Heat-Engine Efficiency | η = 1 - (Qc / Qh)</h3>
+    <form onsubmit="calculate(event, 'engine_eff')">
+        <label>Heat Supplied by Hot Reservoir, Qh (J):</label>
+        <input type="number" step="1000" placeholder="120000" id="engine_hot" required>
+        
+        <label>Heat Rejected to Cold Reservoir, Qc (J):</label>
+        <input type="number" step="1000" placeholder="60000" id="engine_cold" required>
+        
+        <button type="submit">Calculate</button>
+    </form>
+    <div id="engine_result" class="result"></div>
+</div>
+
+<script>
+function calculate(event, action) {
+    event.preventDefault();
+    
+    let data = { action: action };
+    
+    if (action === 'conduction') {
+        data.conductivity = document.getElementById('cond_conductivity').value;
+        data.area = document.getElementById('cond_area').value;
+        data.delta_temp = document.getElementById('cond_temp_diff').value;
+        data.thickness = document.getElementById('cond_thickness').value;
+    } else if (action === 'cop') {
+        data.type = document.getElementById('cop_type').value;
+        data.heat = document.getElementById('cop_heat').value;
+        data.work = document.getElementById('cop_work').value;
+    } else if (action === 'engine_eff') {
+        data.heat_hot = document.getElementById('engine_hot').value;
+        data.heat_cold = document.getElementById('engine_cold').value;
+    }
+    
+    fetch('{{ url_for("thermal_eng") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        let resultDiv = document.getElementById(action + '_result');
+        if (result.error) {
+            resultDiv.innerHTML = `<p class="error">❌ Error: ${result.error}</p>`;
+            resultDiv.className = 'result error';
+        } else {
+            let output = '';
+            for (let key in result) {
+                output += `<p><strong>${key}:</strong> ${result[key]}</p>`;
+            }
+            resultDiv.innerHTML = output;
+            resultDiv.className = 'result success';
+        }
+    });
+}
+
+document.querySelectorAll('.tab-button').forEach(button => {
+    button.addEventListener('click', function() {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        
+        document.getElementById(this.dataset.tab).classList.add('active');
+        this.classList.add('active');
+    });
+});
+</script>
+{% endblock %}
